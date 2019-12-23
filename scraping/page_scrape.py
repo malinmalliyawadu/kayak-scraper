@@ -7,24 +7,19 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 import smtplib
 from email.mime.multipart import MIMEMultipart
+from util.countdown import countdown
+from recaptcha import try_clear_recaptcha
 
-def page_scrape(driver):
+def get_durations(driver):
     # see screenshots/duration_route_els.png
     duration_route_els = '.section.duration'
-    sections = driver.find_elements_by_css_selector(duration_route_els)
+    return driver.find_elements_by_css_selector(duration_route_els)
+
+def page_scrape(driver):
+    sections = get_durations(driver)
     sections_list = [value.text for value in sections]
     section_a_list = sections_list[::2] # This is to separate the two flights
     section_b_list = sections_list[1::2] # This is to separate the two flights
-    
-    # if you run into a reCaptcha, you might want to do something about it
-    # you will know there's a problem if the lists above are empty
-    # this if statement lets you exit the bot or do something else
-    # you can add a sleep here, to let you solve the captcha and continue scraping
-    # i'm using a SystemExit because i want to test everything from the start
-    if section_a_list == []:
-        print('\nMight have run into a reCaptcha 😡')
-        sleep(60)
-        raise SystemExit
     
     # I'll use the letter A for the outbound flight and B for the inbound
     a_duration = []
@@ -53,11 +48,10 @@ def page_scrape(driver):
     b_weekday = [value.split()[1] for value in b_date_list]
     
     # getting the prices
-    prices_els = 'a.booking-link span.price-text'
+    prices_els = '.booking a.booking-link span.price-text'
     prices = driver.find_elements_by_css_selector(prices_els)
-    prices_list = [price.text.replace('$','') for price in prices if price.text != '' and '$' in price.text]
+    prices_list = [price.text.replace('$','').replace(',', '') for price in prices if price.text != '' and '$' in price.text]
     prices_list = list(map(int, prices_list))
-
     # the stops are a big list with one leg on the even index and second leg on odd index
     # see screenshots/num_stops_els.png
     num_stops_els = 'div.section.stops div.top'
@@ -87,7 +81,6 @@ def page_scrape(driver):
     a_carrier = carrier_list[::2]
     b_hours = hours_list[1::2]
     b_carrier = carrier_list[1::2]
-
     
     cols = (['Out Day', 'Out Time', 'Out Weekday', 'Out Airline', 'Out Cities', 'Out Duration', 'Out Stops', 'Out Stop Cities',
             'Return Day', 'Return Time', 'Return Weekday', 'Return Airline', 'Return Cities', 'Return Duration', 'Return Stops', 'Return Stop Cities',
