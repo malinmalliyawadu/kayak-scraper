@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from util.countdown import countdown
+from util.console import delete_last_lines
 
 def is_recaptcha_on_page(driver):
     try:
@@ -23,11 +24,12 @@ def try_clear_recaptcha(driver):
     has_cleared_recaptcha = False
 
     while not has_cleared_recaptcha and recaptcha_retries_remaining > 0:
-        print('{} attempts left. Retrying in... '.format(recaptcha_retries_remaining)),
+        print('{} attempts left. Retrying in... '.format(recaptcha_retries_remaining), end='')
         countdown(10, 1)
         print('')
         has_cleared_recaptcha = not is_recaptcha_on_page(driver)
         recaptcha_retries_remaining -= 1
+        delete_last_lines(1)
 
     if recaptcha_retries_remaining == 0:
         print('Retry failed... closing 😔')

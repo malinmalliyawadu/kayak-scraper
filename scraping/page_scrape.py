@@ -8,7 +8,7 @@ from selenium.webdriver.common.keys import Keys
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from util.countdown import countdown
-from recaptcha import try_clear_recaptcha
+from scraping.recaptcha import try_clear_recaptcha
 
 def get_durations(driver):
     # see screenshots/duration_route_els.png

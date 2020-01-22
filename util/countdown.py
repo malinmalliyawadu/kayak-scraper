@@ -1,6 +1,6 @@
 import time
 import sys
-from loading import write, backspace
+from util.loading import write, backspace
 
 def countdown(start, wait):
     for i in range(start, 0, -1):
